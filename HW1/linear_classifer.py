@@ -5,8 +5,9 @@ import time
 
 NUM_CLASSES = 10
 NUM_FEATURES = 784
-NUM_TRIALS = 1000
+NUM_TRIALS = 100
 TEST_SET_SIZE = 500
+INITIAL_W_SCALE_FACTOR = 0.01
 
 class LinearClassifier:
     def __init__(self):
@@ -15,7 +16,7 @@ class LinearClassifier:
 
     def generate_randomized_W_matrices(self):
         # weights tend to start with small values (so we multiply by 0.01)
-        self.Ws = np.random.randn(NUM_TRIALS, NUM_CLASSES, NUM_FEATURES) * 0.01
+        self.Ws = np.random.randn(NUM_TRIALS, NUM_CLASSES, NUM_FEATURES) * INITIAL_W_SCALE_FACTOR
 
     def calculate_softmax_prob(self, scores):
         exp_scores = np.exp(scores)
@@ -36,10 +37,14 @@ class LinearClassifier:
             softmax_probs = self.calculate_softmax_prob(self.scores[i])
 
             ''' note: we can efficiently find the correct class probabilities for each image
-                # - np.arange(self.num_images) provides the column indices for all images
-                # - the value of self.training_labels provides the correct class index
-                # - thus, over 60K images, training_labels[i] will resolve to the row index of correct class for each image, in softmax_probs
-                # - similarly, np.arange(self.num_images) will resolve to the column index of each of the 60k images  
+                - np.arange(self.num_images) provides the column indices for all images.
+                - the value of self.training_labels provides the correct class index.
+                
+                - thus, over 60K images, training_labels[i] will resolve to the row index 
+                of correct class for each image, in softmax_probs.
+                
+                - similarly, np.arange(self.num_images) will resolve to the column index of each 
+                of the 60k images.
             '''
             correct_class_probs = softmax_probs[self.training_labels, np.arange(self.num_images)]
             log_probs = -np.log(correct_class_probs)
