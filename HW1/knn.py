@@ -54,18 +54,15 @@ class NearestNeighbors:
         # return the key with the max count
         return max(label_counts, key=label_counts.get)
 
-    def calculate_distance(self, x1, x2, mode="L2"):
+    def calculate_distance(self, x1, x2, mode):
         if mode == "L1":
             return np.sum(np.abs(x1 - x2))
-        else:
-            print("using L2 distance function...")
+        elif mode == "L2":
             return np.linalg.norm(x1 - x2)
 
-def kNNClassify(test_set, training_set, training_labels):    
+def kNNClassify(test_set, training_set, training_labels, mode="L1"):    
     result = []
-
-    mode = "L1" # this can be set to "L1" or "L2"
-    print(f"using {mode} distance function...")
+    print(f"K: {K}, test set size: {SET_SIZE}, mode: {mode} distance function...")
 
     for test_img in test_set:
         neighbors = NearestNeighbors()
@@ -76,13 +73,13 @@ def kNNClassify(test_set, training_set, training_labels):
         result.append(neighbors.get_consensus())
     return result
 
+SET_SIZE = 20
+K = 3
+MODE = "L2"
 start_time = time.time()
-
-outputlabels=kNNClassify(x_test[0:SET_SIZE],x_train,y_train)
-
+predicted_labels = kNNClassify(x_test[0:SET_SIZE],x_train,y_train, MODE)
 # calculate the classification accuracy by comparing the output labels with ground truth
-result = y_test[0:SET_SIZE] - outputlabels
-result = (1 - np.count_nonzero(result)/len(outputlabels))
+result = y_test[0:SET_SIZE] - predicted_labels
+result = (1 - np.count_nonzero(result)/len(predicted_labels))
 print ("---classification accuracy for knn on mnist: %s     ---" %result)
-
 print ("---execution time: %s seconds ---" % (time.time() - start_time))

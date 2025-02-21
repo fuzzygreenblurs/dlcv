@@ -23,7 +23,6 @@ class LinearClassifier:
         return exp_scores / np.sum(exp_scores, axis=0, keepdims=True)
 
     def train(self):
-        # TODO: is there a more efficient way to batch process scores?
         self.scores = np.zeros((NUM_TRIALS, NUM_CLASSES, self.num_images))
         for i, W in enumerate(self.Ws):
             # recall training set is 60000 x 784. training_set.T is 784 x 60000
@@ -36,16 +35,6 @@ class LinearClassifier:
             # we can simplify the loss function to simply be -log(probability of correct label)
             softmax_probs = self.calculate_softmax_prob(self.scores[i])
 
-            ''' note: we can efficiently find the correct class probabilities for each image
-                - np.arange(self.num_images) provides the column indices for all images.
-                - the value of self.training_labels provides the correct class index.
-                
-                - thus, over 60K images, training_labels[i] will resolve to the row index 
-                of correct class for each image, in softmax_probs.
-                
-                - similarly, np.arange(self.num_images) will resolve to the column index of each 
-                of the 60k images.
-            '''
             correct_class_probs = softmax_probs[self.training_labels, np.arange(self.num_images)]
             log_probs = -np.log(correct_class_probs)
             losses[i] = np.mean(log_probs)
