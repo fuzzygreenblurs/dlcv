@@ -1,15 +1,12 @@
 import math
 import numpy as np  
-import operator  
 import pickle
 import time
-import heapq
-import pdb
 
-TEST_SET_SIZE = 500
-NUM_TRIALS = 1000
 NUM_CLASSES = 10
 NUM_FEATURES = 784
+NUM_TRIALS = 1000
+TEST_SET_SIZE = 500
 
 class LinearClassifier:
     def __init__(self):
@@ -51,11 +48,10 @@ class LinearClassifier:
         self.optimal_W = self.Ws[np.argmin(losses)]
 
     def predict(self):
-        predictions = []
-        for test_img in self.test_set[0:TEST_SET_SIZE]:
+        predictions = np.zeros(TEST_SET_SIZE)
+        for i, test_img in enumerate(self.test_set[0:TEST_SET_SIZE]):
             scores = np.dot(self.optimal_W, test_img)
-            prediction = np.argmax(scores)
-            predictions.append(prediction)
+            predictions[i] = np.argmax(scores)
 
         return predictions
 
@@ -68,12 +64,9 @@ class LinearClassifier:
         self.test_set        = mnist["test_images"]
         self.test_labels     = mnist["test_labels"]
 
-        # self.training_set    = self.training_set.reshape(60000,28,28)
-        # self.test_set        = self.test_set.reshape(10000,28,28)
         self.training_set    = self.training_set.astype(float)
         self.test_set        = self.test_set.astype(float)
         self.num_images      = self.training_set.shape[0]
-
 
 classifier = LinearClassifier()
 
