@@ -21,7 +21,11 @@ dp_dm = (m > 0).astype(float)               # element-wise ReLU: 3x1
 
 dm_dW = x.T                                 # 1x3
 df_dW =  (df_dp * dp_dm) @ dm_dW            # (3x1 * 3x1) x 1x3 = 3x3
+                                            # note: the ReLU function is applied element-wise so we use the * operator here.
+                                            # however, each element of m is affected the sum of different proportional components of W
+                                            # the matrix multiplier "@" operator captures this behavior
 
+## backward pass
 dm_dx = W
 df_dx =  dm_dx @ (dp_dm * df_dp)
 
