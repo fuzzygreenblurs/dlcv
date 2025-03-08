@@ -3,6 +3,7 @@ import numpy as np
 import pickle
 import time
 
+TRAINING_EPOCHS = 10
 NUM_CLASSES = 10
 NUM_FEATURES = 784
 BATCH_SIZE = 32
@@ -72,7 +73,7 @@ class LinearClassifier:
         '''
         J = np.zeros((10, 10, BATCH_SIZE))                                                # [10x10x32]
         for i in range(BATCH_SIZE):
-            P = P[:, i]                                                                    # ith column of P (corresponding to ith image in batch) [10x1]
+            P = self.P[:, i]                                                               # ith column of P (corresponding to ith image in batch) [10x1]
             outer = -np.outer(P, P)                                                        # populate off-diagonal elements of Jacobian for image [10x10]
             diagonal = P * (1-P)                                                           # element-wise multiplication of P_i (10x1) vector with the complement of itself [10x1]
             J[:, :, i] = outer                                                             # set the ith slice of J (corresponding to the given image) to be the outer [10x10x32]
@@ -82,17 +83,32 @@ class LinearClassifier:
 
     def train(self):
         num_samples = self.training_set.shape[0]                                            # training set: 60000x784
-        for i in range(0, num_samples, BATCH_SIZE):                                         # BATCH_SIZE = 32
-            self.batch_idx = i
-            self.forward()
-            self.backward()
 
-            self.W -= LEARNING_RATE * self.dL_dW
+        for e in range(TRAINING_EPOCHS):
+
+            # shuffle the data to avoid overfitting
+            indices = np.arange(num_samples)
+            np.random.shuffle(indices)
+            self.training_set = self.training_set[indices]
+            self.training_labels = self.training_labels[indices]
+
+            epoch_loss = 0
+            batches = 0
+            for i in range(0, num_samples, BATCH_SIZE):                                         # BATCH_SIZE = 32
+                self.batch_idx = i
+                self.forward()
+                self.backward()
+                self.W -= LEARNING_RATE * self.dL_dW
+                
+                epoch_loss += self.loss
+                batches += 1
+                
+            print(f"epoch {e}: batches: {batches}, loss: {self.loss}")
 
     def predict(self):
         predictions = np.zeros(TEST_SET_SIZE)
         for i, test_img in enumerate(self.test_set[0:TEST_SET_SIZE]):
-            scores = np.dot(self.optimal_W, test_img)
+            scores = np.dot(self.W, test_img)
             predictions[i] = np.argmax(scores)
 
         return predictions
