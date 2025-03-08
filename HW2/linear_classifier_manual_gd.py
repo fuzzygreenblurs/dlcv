@@ -2,6 +2,7 @@ import math
 import numpy as np  
 import pickle
 import time
+import pdb
 
 TRAINING_EPOCHS = 10
 NUM_CLASSES = 10
@@ -36,8 +37,8 @@ class LinearClassifier:
                                                                                             # note that `labels` encodes the row index for the right label for each image
 
         Lce = -np.log(self.Pc)                                                              # cross-entropy loss component encoding loss per image in batch [32x1]
-        reg = (LAMBDA / 2) * (self.W ** 2)                                                  # regularization loss component (L2) [10x10]
-        self.loss = np.mean(Lce) + reg                                                      # final loss assigned to W [1x1]
+        reg = (LAMBDA / 2) * np.sum(self.W ** 2)                                            # regularization loss component (L2) [1x1]. I use LAMBDA/2 here to simplify the derivative in backpass.
+        self.batch_loss = np.mean(Lce) + reg                                                # final loss assigned to W [1x1]
     
     def backward(self):               
         # please see attached notes for derivation of these expressions
@@ -97,10 +98,11 @@ class LinearClassifier:
             for i in range(0, num_samples, BATCH_SIZE):                                         # BATCH_SIZE = 32
                 self.batch_idx = i
                 self.forward()
+                print("loss: ", self.batch_loss)
                 self.backward()
                 self.W -= LEARNING_RATE * self.dL_dW
                 
-                epoch_loss += self.loss
+                epoch_loss += self.batch_loss
                 batches += 1
                 
             print(f"epoch {e}: batches: {batches}, loss: {self.loss}")
